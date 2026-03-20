@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /e/porulon/Kana -type f -name *review*)",
+      "Bash(grep -E '\\\\.ts$')",
+      "Bash(pnpm db:migrate)",
+      "Bash(PGPASSWORD='E@j#u_5304' psql -U postgres -d kana_travels -c \"SELECT pg_advisory_unlock_all\\(\\);\")",
+      "Bash(node -e \"require\\(''pptxgenjs''\\)\")",
+      "Bash(npm install:*)",
+      "Bash(node create_presentation.js)",
+      "Bash(npm root:*)",
+      "Bash(NODE_PATH=\"C:/Users/felix/AppData/Roaming/npm/node_modules\" node create_presentation.js)"
+    ]
+  }
+}

@@ -1,0 +1,107 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kana
+      POSTGRES_PASSWORD: kana_secret
+      POSTGRES_DB: kana_travels
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kana"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+      NODE_ENV: production
+      DATABASE_URL: postgresql://kana:kana_secret@postgres:5432/kana_travels
+      MONGODB_URI: mongodb://mongodb:27017/kana_travels
+      JWT_SECRET: ${JWT_SECRET:-change-this-to-a-secure-secret-min-32-chars}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
+      PAYU_MERCHANT_KEY: ${PAYU_MERCHANT_KEY}
+      PAYU_MERCHANT_SALT: ${PAYU_MERCHANT_SALT}
+      PAYU_BASE_URL: https://test.payu.in
+      AMADEUS_CLIENT_ID: ${AMADEUS_CLIENT_ID}
+      AMADEUS_CLIENT_SECRET: ${AMADEUS_CLIENT_SECRET}
+      AMADEUS_HOSTNAME: test
+      REDBUS_API_KEY: ${REDBUS_API_KEY}
+      REDBUS_BASE_URL: https://api.redbus.in
+      CUSTOMER_APP_URL: http://localhost:3000
+      ADMIN_APP_URL: http://localhost:3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+
+  customer:
+    build:
+      context: .
+      dockerfile: apps/customer/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
+        NEXT_PUBLIC_RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+        NEXT_PUBLIC_PAYU_MERCHANT_KEY: ${PAYU_MERCHANT_KEY}
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-change-this-to-a-secure-secret}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+    depends_on:
+      - api
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      NEXTAUTH_URL: http://localhost:3001
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-change-this-to-a-secure-secret}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      DATABASE_URL: postgresql://kana:kana_secret@postgres:5432/kana_travels
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  mongo_data:

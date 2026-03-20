@@ -1,0 +1,4 @@
+{
+  "extends": "@kana/tsconfig/base.json",
+  "include": ["src/**/*"]
+}

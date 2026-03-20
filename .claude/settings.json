@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where psql:*)",
+      "Read(//c/Program Files/PostgreSQL/**)",
+      "Read(//c/Program Files \\(x86\\)/**)",
+      "Bash(PGPASSWORD='E@j#u_5304' \"/c/Program Files/PostgreSQL/18/bin/psql\" -U postgres -d kana_travels -c \"SELECT pid, usename, application_name, state, query FROM pg_stat_activity WHERE datname = ''kana_travels'';\")",
+      "Bash(PGPASSWORD='E@j#u_5304' \"/c/Program Files/PostgreSQL/18/bin/psql\" -U postgres -d kana_travels -c \"SELECT pg_terminate_backend\\(pid\\) FROM pg_stat_activity WHERE datname = ''kana_travels'' AND pid <> pg_backend_pid\\(\\);\")",
+      "Bash(grep -r \"apiClient\\\\|fetch\\\\|axios\" e:porulonKanaappsadminsrcapppackages --include=*.tsx --include=*.ts)",
+      "Bash(pnpm --filter @kana/database run db:migrate -- --name add_password_to_user)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm db:seed)",
+      "Bash(curl -s http://localhost:3001/login -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s -X POST http://localhost:3001/api/auth/callback/credentials -H \"Content-Type: application/x-www-form-urlencoded\" -d \"email=superadmin%40kana.com&password=Admin%401234&csrfToken=test&json=true\" -w \"\\\\nHTTP_CODE:%{http_code}\")",
+      "Bash(pnpm db:generate)",
+      "Bash(pnpm dev:*)",
+      "Bash(curl -s http://localhost:3001 -o /dev/null -w \"Admin:%{http_code} \")",
+      "Bash(curl -s http://localhost:4000/api/v1/health -o /dev/null -w \"API:%{http_code} \")",
+      "Bash(curl -s http://localhost:3000 -o /dev/null -w \"Customer:%{http_code}\")",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(curl -s http://localhost:4000/api/v1/health -w \"API:%{http_code}\")",
+      "Bash(curl -s http://localhost:3001 -o /dev/null -w \"%{redirect_url}\")",
+      "Bash(curl -s http://localhost:4000/api/v1/hotels?limit=1)"
+    ]
+  }
+}

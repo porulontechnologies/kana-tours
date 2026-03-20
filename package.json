@@ -1,0 +1,21 @@
+{
+  "name": "kana-travels",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "dev:customer": "turbo dev --filter=@kana/customer",
+    "dev:admin": "turbo dev --filter=@kana/admin",
+    "dev:api": "turbo dev --filter=@kana/api",
+    "dev:agent": "turbo dev --filter=@kana/agent",
+    "db:generate": "pnpm --filter @kana/database run db:generate",
+    "db:migrate": "pnpm --filter @kana/database run db:migrate",
+    "db:seed": "pnpm --filter @kana/database run db:seed"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0",
+    "typescript": "^5.7.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

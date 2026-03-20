@@ -1,0 +1,280 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  SUPER_ADMIN
+  AGENT
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  REFUNDED
+}
+
+enum BookingType {
+  TOUR_PACKAGE
+  HOTEL
+  FLIGHT
+  BUS
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum PaymentGateway {
+  RAZORPAY
+  PAYU
+}
+
+enum PaymentMethod {
+  UPI
+  CARD
+  NETBANKING
+  WALLET
+}
+
+// ─── User & Auth ─────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  phone         String?
+  role          UserRole  @default(CUSTOMER)
+  password      String?   @db.Text
+  googleId      String?   @unique
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  bookings Booking[]
+  accounts Account[]
+  sessions Session[]
+  agent    TourAgent?
+
+  @@index([email])
+  @@index([googleId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Tour Agents ─────────────────────────────────────────
+
+model TourAgent {
+  id         String  @id @default(cuid())
+  userId     String  @unique
+  agencyName String?
+  phone      String?
+  address    String?
+  isActive   Boolean @default(true)
+
+  // Commission rates in percentage (e.g. 5.0 = 5%)
+  flightCommission Float @default(0)
+  busCommission    Float @default(0)
+  hotelCommission  Float @default(0)
+  tourCommission   Float @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  @@index([userId])
+  @@index([isActive])
+}
+
+// ─── Hotels ──────────────────────────────────────────────
+
+model Hotel {
+  id            String   @id @default(cuid())
+  name          String
+  slug          String   @unique
+  description   String   @db.Text
+  address       String
+  city          String
+  state         String
+  country       String   @default("India")
+  pincode       String?
+  latitude      Float?
+  longitude     Float?
+  starRating    Int      @default(3)
+  amenities     String[]
+  images        String[]
+  pricePerNight Float
+  contactEmail  String?
+  contactPhone  String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  rooms    Room[]
+  bookings Booking[]
+
+  @@index([city])
+  @@index([slug])
+  @@index([isActive])
+}
+
+model Room {
+  id            String   @id @default(cuid())
+  hotelId       String
+  type          String
+  capacity      Int
+  pricePerNight Float
+  amenities     String[]
+  images        String[]
+  totalRooms    Int
+  isActive      Boolean  @default(true)
+
+  hotel    Hotel     @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+}
+
+// ─── Tour Packages ───────────────────────────────────────
+
+model TourPackage {
+  id               String     @id @default(cuid())
+  name             String
+  slug             String     @unique
+  description      String     @db.Text
+  shortDescription String?
+  destination      String
+  duration         Int
+  nights           Int
+  maxGroupSize     Int
+  price            Float
+  discountedPrice  Float?
+  inclusions       String[]
+  exclusions       String[]
+  itinerary        Json
+  images           String[]
+  coverImage       String?
+  startDates       DateTime[]
+  category         String
+  isActive         Boolean    @default(true)
+  isFeatured       Boolean    @default(false)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  bookings Booking[]
+
+  @@index([destination])
+  @@index([slug])
+  @@index([category])
+  @@index([isActive])
+}
+
+// ─── Bookings ────────────────────────────────────────────
+
+model Booking {
+  id          String        @id @default(cuid())
+  userId      String
+  bookingType BookingType
+  status      BookingStatus @default(PENDING)
+  totalAmount Float
+  currency    String        @default("INR")
+
+  hotelId       String?
+  roomId        String?
+  tourPackageId String?
+  externalRef   String?
+  agentId       String?
+
+  checkIn         DateTime?
+  checkOut        DateTime?
+  guestCount      Int       @default(1)
+  specialRequests String?   @db.Text
+  contactName     String
+  contactEmail    String
+  contactPhone    String
+  passengerDetails Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id])
+  hotel       Hotel?       @relation(fields: [hotelId], references: [id])
+  room        Room?        @relation(fields: [roomId], references: [id])
+  tourPackage TourPackage? @relation(fields: [tourPackageId], references: [id])
+  agent       TourAgent?   @relation(fields: [agentId], references: [id])
+  payment     Payment?
+
+  @@index([userId])
+  @@index([agentId])
+  @@index([status])
+  @@index([bookingType])
+  @@index([createdAt])
+}
+
+// ─── Payments ────────────────────────────────────────────
+
+model Payment {
+  id               String         @id @default(cuid())
+  bookingId        String         @unique
+  gateway          PaymentGateway
+  method           PaymentMethod?
+  gatewayOrderId   String?
+  gatewayPaymentId String?
+  amount           Float
+  currency         String         @default("INR")
+  status           PaymentStatus  @default(PENDING)
+  gatewayResponse  Json?
+  paidAt           DateTime?
+  refundedAt       DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+
+  @@index([gatewayOrderId])
+  @@index([status])
+}
