@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Plus, X, Save, GripVertical } from "lucide-react";
+import { ArrowLeft, Plus, X, Save } from "lucide-react";
 import toast from "react-hot-toast";
 import apiClient from "@/lib/api-client";
+import MultiImageUploader from "@/components/MultiImageUploader";
 
 interface ItineraryDay {
   day: number;
@@ -42,7 +43,7 @@ export default function CreatePackagePage() {
   const [itinerary, setItinerary] = useState<ItineraryDay[]>([
     { day: 1, title: "", description: "", activities: [""] },
   ]);
-  const [imageUrls, setImageUrls] = useState<string[]>([""]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [startDates, setStartDates] = useState<string[]>([""]);
 
   const handleInputChange = (
@@ -507,39 +508,17 @@ export default function CreatePackagePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="admin-card">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-navy-800">Images</h2>
-              <button
-                type="button"
-                onClick={() => addListItem(setImageUrls)}
-                className="text-sm text-navy-600 hover:text-navy-800 font-medium flex items-center gap-1"
-              >
-                <Plus size={14} />
-                Add
-              </button>
-            </div>
-            <div className="space-y-2">
-              {imageUrls.map((url, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <input
-                    type="url"
-                    value={url}
-                    onChange={(e) => updateListItem(setImageUrls, index, e.target.value)}
-                    placeholder="https://example.com/image.jpg"
-                    className="admin-input text-sm py-2"
-                  />
-                  {imageUrls.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeListItem(setImageUrls, index)}
-                      className="p-1.5 text-gray-400 hover:text-red-500 flex-shrink-0"
-                    >
-                      <X size={16} />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
+            <h2 className="text-lg font-semibold text-navy-800 mb-1">Images</h2>
+            <p className="text-xs text-gray-500 mb-4">
+              Upload photos — each will be cropped to 3:2 to match the tour listing card display.
+            </p>
+            <MultiImageUploader
+              images={imageUrls}
+              onChange={setImageUrls}
+              aspect={3 / 2}
+              aspectLabel="3:2 (tour listing)"
+              maxImages={10}
+            />
           </div>
 
           <div className="admin-card">

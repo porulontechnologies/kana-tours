@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Plus, X, Upload, Save } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 import toast from "react-hot-toast";
 import apiClient from "@/lib/api-client";
+import MultiImageUploader from "@/components/MultiImageUploader";
 
 const amenitiesList = [
   "WiFi",
@@ -43,7 +44,7 @@ export default function CreateHotelPage() {
     contactPhone: "",
   });
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-  const [imageUrls, setImageUrls] = useState<string[]>([""]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   const fieldError = (field: string) =>
     fieldErrors[field]?.length ? (
@@ -60,20 +61,6 @@ export default function CreateHotelPage() {
     setSelectedAmenities((prev) =>
       prev.includes(amenity) ? prev.filter((a) => a !== amenity) : [...prev, amenity]
     );
-  };
-
-  const addImageUrl = () => {
-    setImageUrls([...imageUrls, ""]);
-  };
-
-  const removeImageUrl = (index: number) => {
-    setImageUrls(imageUrls.filter((_, i) => i !== index));
-  };
-
-  const updateImageUrl = (index: number, value: string) => {
-    const updated = [...imageUrls];
-    updated[index] = value;
-    setImageUrls(updated);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -304,39 +291,17 @@ export default function CreateHotelPage() {
         </div>
 
         <div className="admin-card">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-navy-800">Images</h2>
-            <button
-              type="button"
-              onClick={addImageUrl}
-              className="admin-btn-secondary text-sm flex items-center gap-1"
-            >
-              <Plus size={14} />
-              Add Image URL
-            </button>
-          </div>
-          <div className="space-y-3">
-            {imageUrls.map((url, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <input
-                  type="url"
-                  value={url}
-                  onChange={(e) => updateImageUrl(index, e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                  className="admin-input"
-                />
-                {imageUrls.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeImageUrl(index)}
-                    className="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
-                  >
-                    <X size={18} />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
+          <h2 className="text-lg font-semibold text-navy-800 mb-1">Images</h2>
+          <p className="text-xs text-gray-500 mb-4">
+            Upload photos — each will be cropped to 4:3 to match the hotel listing card display.
+          </p>
+          <MultiImageUploader
+            images={imageUrls}
+            onChange={setImageUrls}
+            aspect={4 / 3}
+            aspectLabel="4:3 (hotel listing)"
+            maxImages={10}
+          />
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-2">

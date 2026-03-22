@@ -17,6 +17,8 @@ import {
   Plane,
   Bus,
   Briefcase,
+  Paintbrush,
+  MessageSquare,
 } from "lucide-react";
 
 interface NavItem {
@@ -66,6 +68,16 @@ const navItems: NavItem[] = [
     label: "Analytics",
     href: "/analytics",
     icon: <BarChart3 size={20} />,
+  },
+  {
+    label: "Testimonials",
+    href: "/testimonials",
+    icon: <MessageSquare size={20} />,
+  },
+  {
+    label: "Customization",
+    href: "/customization",
+    icon: <Paintbrush size={20} />,
   },
 ];
 

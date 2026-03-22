@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
 import cookieParser from "cookie-parser";
+import path from "path";
 import { env } from "./config/env";
 import { errorHandler } from "./middleware/errorHandler.middleware";
 import { apiLimiter } from "./middleware/rateLimiter.middleware";
@@ -35,6 +36,12 @@ app.get("/api/v1/health", (_req, res) => {
     environment: env.NODE_ENV,
   });
 });
+
+// Serve uploaded files — cross-origin so any front-end can load them in <img> tags
+app.use("/uploads", (_req, res, next) => {
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  next();
+}, express.static(path.join(__dirname, "../uploads")));
 
 // API routes
 app.use("/api/v1", routes);

@@ -39,7 +39,7 @@ export async function createTourPackage(data: {
   });
 }
 
-export async function getTourPackages(filters: TourPackageFilters & { includeInactive?: boolean }) {
+export async function getTourPackages(filters: TourPackageFilters & { includeInactive?: boolean; sortBy?: string }) {
   const {
     destination,
     category,
@@ -50,6 +50,7 @@ export async function getTourPackages(filters: TourPackageFilters & { includeIna
     page = 1,
     limit = 10,
     includeInactive,
+    sortBy,
   } = filters;
 
   const where: Record<string, unknown> = {};
@@ -70,12 +71,19 @@ export async function getTourPackages(filters: TourPackageFilters & { includeIna
     };
   }
 
+  const orderBy =
+    sortBy === "price_asc" ? { price: "asc" as const } :
+    sortBy === "price_desc" ? { price: "desc" as const } :
+    sortBy === "duration_asc" ? { duration: "asc" as const } :
+    sortBy === "duration_desc" ? { duration: "desc" as const } :
+    { createdAt: "desc" as const };
+
   const [packages, total] = await Promise.all([
     prisma.tourPackage.findMany({
       where: where as any,
       skip: (page - 1) * limit,
       take: limit,
-      orderBy: { createdAt: "desc" },
+      orderBy,
     }),
     prisma.tourPackage.count({ where: where as any }),
   ]);

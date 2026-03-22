@@ -255,6 +255,14 @@ model Booking {
   @@index([createdAt])
 }
 
+// ─── Site Configuration ──────────────────────────────────
+
+model SiteConfig {
+  id        String   @id @default("default")
+  config    Json
+  updatedAt DateTime @updatedAt
+}
+
 // ─── Payments ────────────────────────────────────────────
 
 model Payment {

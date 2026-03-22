@@ -47,14 +47,50 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user, account }) {
-      if (user) {
+      // Google OAuth — first sign-in: sync with backend to get DB user ID + backend JWT
+      if (account?.provider === "google" && user) {
+        token.googleEmail = user.email;
+        token.googleName = user.name;
+        token.googleImage = user.image;
+        token.googleProviderAccountId = account.providerAccountId;
+      }
+
+      // Credentials login
+      if (account?.provider === "credentials" && user) {
         token.userId = user.id;
         token.role = (user as any).role ?? "CUSTOMER";
         token.accessToken = (user as any).accessToken;
+        return token;
       }
-      if (account?.access_token) {
-        token.accessToken = account.access_token;
+
+      // For Google users: sync with backend if we don't yet have a backend token
+      if (token.googleEmail && !token.accessToken) {
+        try {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+          const res = await fetch(`${apiUrl}/auth/social-login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: token.googleEmail,
+              name: token.googleName,
+              image: token.googleImage,
+              provider: "google",
+              providerAccountId: token.googleProviderAccountId,
+            }),
+          });
+          if (res.ok) {
+            const body = await res.json();
+            if (body.data) {
+              token.userId = body.data.user.id;
+              token.role = body.data.user.role;
+              token.accessToken = body.data.token;
+            }
+          }
+        } catch {
+          // API unreachable — keep token as-is, will retry on next JWT refresh
+        }
       }
+
       return token;
     },
     async session({ session, token }) {
@@ -65,37 +101,16 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async signIn({ user, account }) {
-      if (!user.email) return false;
-
-      // Sync Google logins with backend
-      if (account?.provider === "google") {
-        try {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-          if (apiUrl) {
-            await fetch(`${apiUrl}/auth/social-login`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                email: user.email,
-                name: user.name,
-                image: user.image,
-                provider: account.provider,
-                providerAccountId: account.providerAccountId,
-              }),
-            });
-          }
-        } catch (error) {
-          console.error("Error syncing user with backend:", error);
-        }
-      }
-
-      return true;
-    },
   },
   pages: {
     signIn: "/login",
     error: "/login",
+  },
+  cookies: {
+    sessionToken: {
+      name: "kana-customer.session-token",
+      options: { httpOnly: true, sameSite: "lax", path: "/", secure: false },
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

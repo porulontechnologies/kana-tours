@@ -9,6 +9,8 @@ import flightRoutes from "./flight.routes";
 import busRoutes from "./bus.routes";
 import reviewRoutes from "./review.routes";
 import agentRoutes from "./agent.routes";
+import siteConfigRoutes from "./siteConfig.routes";
+import uploadRoutes from "./upload.routes";
 
 const router = Router();
 
@@ -22,5 +24,7 @@ router.use("/flights", flightRoutes);
 router.use("/buses", busRoutes);
 router.use("/reviews", reviewRoutes);
 router.use("/agents", agentRoutes);
+router.use("/site-config", siteConfigRoutes);
+router.use("/upload", uploadRoutes);
 
 export default router;

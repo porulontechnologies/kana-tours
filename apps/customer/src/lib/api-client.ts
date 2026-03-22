@@ -27,9 +27,13 @@ apiClient.interceptors.request.use(
 
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      if (typeof window !== "undefined") {
+  async (error) => {
+    if (error.response?.status === 401 && typeof window !== "undefined") {
+      // Only redirect to login if the user has no NextAuth session.
+      // If they DO have a session (e.g. Google user whose backend token is still
+      // syncing), just propagate the error — don't redirect.
+      const session = await getSession();
+      if (!session) {
         window.location.href = "/login";
       }
     }

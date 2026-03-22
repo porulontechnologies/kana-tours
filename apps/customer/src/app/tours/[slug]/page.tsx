@@ -37,6 +37,7 @@ interface TourDetail {
   destination: string;
   images: string[];
   price: number;
+  discountedPrice?: number;
   duration: string;
   rating: number;
   reviewCount: number;
@@ -164,6 +165,7 @@ export default function TourDetailPage() {
       destination: pkg.destination,
       images: pkg.images?.length ? pkg.images : fallbackTour.images,
       price: pkg.price,
+      discountedPrice: pkg.discountedPrice ?? undefined,
       duration: `${pkg.duration} Day${pkg.duration !== 1 ? "s" : ""} / ${pkg.nights} Night${pkg.nights !== 1 ? "s" : ""}`,
       rating: 0,
       reviewCount: 0,
@@ -265,12 +267,31 @@ export default function TourDetailPage() {
               <div className="mb-1 text-xs uppercase text-gray-400">
                 Starting from
               </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-gold">
-                  ₹{tour.price.toLocaleString("en-IN")}
-                </span>
-                <span className="text-sm text-gray-500">/ person</span>
-              </div>
+              {tour.discountedPrice ? (
+                <>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold text-gold">
+                      ₹{tour.discountedPrice.toLocaleString("en-IN")}
+                    </span>
+                    <span className="text-sm text-gray-500">/ person</span>
+                  </div>
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="text-sm text-gray-400 line-through">
+                      ₹{tour.price.toLocaleString("en-IN")}
+                    </span>
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                      {Math.round((1 - tour.discountedPrice / tour.price) * 100)}% OFF
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-bold text-gold">
+                    ₹{tour.price.toLocaleString("en-IN")}
+                  </span>
+                  <span className="text-sm text-gray-500">/ person</span>
+                </div>
+              )}
 
               <div className="mt-6 space-y-4">
                 <div className="flex items-center gap-3 text-sm">

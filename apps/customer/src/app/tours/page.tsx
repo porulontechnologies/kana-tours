@@ -20,16 +20,18 @@ import {
 interface TourPackage {
   id: string;
   slug: string;
-  title: string;
+  name: string;
   destination: string;
-  image: string;
+  coverImage: string | null;
+  images?: string[];
   price: number;
-  duration: string;
-  rating: number;
-  reviewCount: number;
+  duration: number;
+  nights?: number;
+  rating?: number;
+  reviewCount?: number;
   category: string;
-  groupSize: number;
-  description: string;
+  maxGroupSize: number;
+  shortDescription?: string | null;
 }
 
 const categories = [
@@ -64,147 +66,194 @@ const fallbackTours: TourPackage[] = [
   {
     id: "1",
     slug: "kerala-backwaters",
-    title: "Kerala Backwaters Paradise",
+    name: "Kerala Backwaters Paradise",
     destination: "Kerala, India",
-    image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=600&h=400&fit=crop",
+    coverImage: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=600&h=400&fit=crop",
     price: 24999,
-    duration: "5 Days / 4 Nights",
+    duration: 5,
+    nights: 4,
     rating: 4.8,
     reviewCount: 124,
     category: "Beach",
-    groupSize: 15,
-    description: "Experience the serene beauty of Kerala backwaters on a luxury houseboat.",
+    maxGroupSize: 15,
+    shortDescription: "Experience the serene beauty of Kerala backwaters on a luxury houseboat.",
   },
   {
     id: "2",
     slug: "rajasthan-royal",
-    title: "Royal Rajasthan Explorer",
+    name: "Royal Rajasthan Explorer",
     destination: "Rajasthan, India",
-    image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=600&h=400&fit=crop",
+    coverImage: "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=600&h=400&fit=crop",
     price: 32999,
-    duration: "7 Days / 6 Nights",
+    duration: 7,
+    nights: 6,
     rating: 4.9,
     reviewCount: 89,
     category: "Cultural",
-    groupSize: 20,
-    description: "Discover the majestic forts and palaces of Rajasthan.",
+    maxGroupSize: 20,
+    shortDescription: "Discover the majestic forts and palaces of Rajasthan.",
   },
   {
     id: "3",
     slug: "goa-beaches",
-    title: "Goa Beach Getaway",
+    name: "Goa Beach Getaway",
     destination: "Goa, India",
-    image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=600&h=400&fit=crop",
+    coverImage: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=600&h=400&fit=crop",
     price: 18999,
-    duration: "4 Days / 3 Nights",
+    duration: 4,
+    nights: 3,
     rating: 4.7,
     reviewCount: 203,
     category: "Beach",
-    groupSize: 12,
-    description: "Sun, sand, and vibrant nightlife in India's beach paradise.",
+    maxGroupSize: 12,
+    shortDescription: "Sun, sand, and vibrant nightlife in India's beach paradise.",
   },
   {
     id: "4",
     slug: "himachal-adventure",
-    title: "Himachal Mountain Adventure",
+    name: "Himachal Mountain Adventure",
     destination: "Himachal Pradesh, India",
-    image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=600&h=400&fit=crop",
+    coverImage: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=600&h=400&fit=crop",
     price: 27999,
-    duration: "6 Days / 5 Nights",
+    duration: 6,
+    nights: 5,
     rating: 4.6,
     reviewCount: 156,
     category: "Adventure",
-    groupSize: 10,
-    description: "Trekking and adventure in the stunning Himalayan mountains.",
+    maxGroupSize: 10,
+    shortDescription: "Trekking and adventure in the stunning Himalayan mountains.",
   },
   {
     id: "5",
     slug: "andaman-islands",
-    title: "Andaman Island Escape",
+    name: "Andaman Island Escape",
     destination: "Andaman & Nicobar",
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=400&fit=crop",
+    coverImage: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=400&fit=crop",
     price: 35999,
-    duration: "6 Days / 5 Nights",
+    duration: 6,
+    nights: 5,
     rating: 4.9,
     reviewCount: 78,
     category: "Beach",
-    groupSize: 8,
-    description: "Crystal clear waters and pristine beaches of the Andaman Islands.",
+    maxGroupSize: 8,
+    shortDescription: "Crystal clear waters and pristine beaches of the Andaman Islands.",
   },
   {
     id: "6",
     slug: "kashmir-valley",
-    title: "Kashmir Valley Dream",
+    name: "Kashmir Valley Dream",
     destination: "Kashmir, India",
-    image: "https://images.unsplash.com/photo-1597074866923-dc0589150458?w=600&h=400&fit=crop",
+    coverImage: "https://images.unsplash.com/photo-1597074866923-dc0589150458?w=600&h=400&fit=crop",
     price: 29999,
-    duration: "5 Days / 4 Nights",
+    duration: 5,
+    nights: 4,
     rating: 4.8,
     reviewCount: 112,
     category: "Hill Station",
-    groupSize: 15,
-    description: "Explore the paradise on earth with stunning valleys and lakes.",
+    maxGroupSize: 15,
+    shortDescription: "Explore the paradise on earth with stunning valleys and lakes.",
   },
   {
     id: "7",
     slug: "jim-corbett-wildlife",
-    title: "Jim Corbett Wildlife Safari",
+    name: "Jim Corbett Wildlife Safari",
     destination: "Uttarakhand, India",
-    image: "https://images.unsplash.com/photo-1549366021-9f761d450615?w=600&h=400&fit=crop",
+    coverImage: "https://images.unsplash.com/photo-1549366021-9f761d450615?w=600&h=400&fit=crop",
     price: 22999,
-    duration: "4 Days / 3 Nights",
+    duration: 4,
+    nights: 3,
     rating: 4.5,
     reviewCount: 95,
     category: "Wildlife",
-    groupSize: 6,
-    description: "Thrilling wildlife safari in India's oldest national park.",
+    maxGroupSize: 6,
+    shortDescription: "Thrilling wildlife safari in India's oldest national park.",
   },
   {
     id: "8",
     slug: "manali-honeymoon",
-    title: "Manali Honeymoon Special",
+    name: "Manali Honeymoon Special",
     destination: "Manali, India",
-    image: "https://images.unsplash.com/photo-1571401835393-8c5f35328320?w=600&h=400&fit=crop",
+    coverImage: "https://images.unsplash.com/photo-1571401835393-8c5f35328320?w=600&h=400&fit=crop",
     price: 21999,
-    duration: "5 Days / 4 Nights",
+    duration: 5,
+    nights: 4,
     rating: 4.7,
     reviewCount: 187,
     category: "Honeymoon",
-    groupSize: 2,
-    description: "A romantic mountain escape in the heart of Himachal Pradesh.",
+    maxGroupSize: 2,
+    shortDescription: "A romantic mountain escape in the heart of Himachal Pradesh.",
   },
   {
     id: "9",
     slug: "varanasi-spiritual",
-    title: "Varanasi Spiritual Journey",
+    name: "Varanasi Spiritual Journey",
     destination: "Varanasi, India",
-    image: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=600&h=400&fit=crop",
+    coverImage: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=600&h=400&fit=crop",
     price: 15999,
-    duration: "3 Days / 2 Nights",
+    duration: 3,
+    nights: 2,
     rating: 4.6,
     reviewCount: 134,
     category: "Pilgrimage",
-    groupSize: 20,
-    description: "Discover the spiritual heart of India along the sacred Ganges.",
+    maxGroupSize: 20,
+    shortDescription: "Discover the spiritual heart of India along the sacred Ganges.",
   },
 ];
+
+const SORT_OPTIONS = [
+  { label: "Sort: Recommended", value: "" },
+  { label: "Price: Low to High", value: "price_asc" },
+  { label: "Price: High to Low", value: "price_desc" },
+  { label: "Rating: High to Low", value: "rating_desc" },
+  { label: "Duration: Short to Long", value: "duration_asc" },
+];
+
+function matchesPrice(price: number, range: string): boolean {
+  if (!range) return true;
+  if (range === "0-10000") return price < 10000;
+  if (range === "10000-25000") return price >= 10000 && price <= 25000;
+  if (range === "25000-50000") return price >= 25000 && price <= 50000;
+  if (range === "50000+") return price > 50000;
+  return true;
+}
+
+function matchesDuration(duration: number, range: string): boolean {
+  if (!range) return true;
+  if (range === "1-3") return duration >= 1 && duration <= 3;
+  if (range === "4-6") return duration >= 4 && duration <= 6;
+  if (range === "7-10") return duration >= 7 && duration <= 10;
+  if (range === "10+") return duration > 10;
+  return true;
+}
+
+function sortTours(tours: TourPackage[], sortBy: string): TourPackage[] {
+  if (!sortBy) return tours;
+  const arr = [...tours];
+  if (sortBy === "price_asc") return arr.sort((a, b) => a.price - b.price);
+  if (sortBy === "price_desc") return arr.sort((a, b) => b.price - a.price);
+  if (sortBy === "rating_desc") return arr.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+  if (sortBy === "duration_asc") return arr.sort((a, b) => a.duration - b.duration);
+  return arr;
+}
 
 export default function ToursPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedPrice, setSelectedPrice] = useState("");
   const [selectedDuration, setSelectedDuration] = useState("");
+  const [selectedSort, setSelectedSort] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const itemsPerPage = 6;
 
   const { data: apiTours } = useQuery({
-    queryKey: ["packages", selectedCategory, selectedPrice, selectedDuration, currentPage],
+    queryKey: ["packages", selectedCategory, selectedPrice, selectedDuration, selectedSort, currentPage],
     queryFn: async () => {
       const params: Record<string, string> = { page: String(currentPage), limit: String(itemsPerPage) };
       if (selectedCategory !== "All") params.category = selectedCategory;
       if (selectedPrice) params.priceRange = selectedPrice;
       if (selectedDuration) params.duration = selectedDuration;
+      if (selectedSort) params.sortBy = selectedSort;
       const res = await apiClient.get("/packages", { params });
       return res.data;
     },
@@ -213,24 +262,27 @@ export default function ToursPage() {
 
   const tours: TourPackage[] = apiTours?.data || fallbackTours;
 
-  const filteredTours = tours.filter((tour) => {
-    const matchesSearch =
-      !searchQuery ||
-      tour.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tour.destination.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "All" || tour.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const filteredTours = sortTours(
+    tours.filter((tour) => {
+      const matchesSearch =
+        !searchQuery ||
+        tour.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tour.destination.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory =
+        selectedCategory === "All" || tour.category === selectedCategory;
+      return matchesSearch && matchesCategory && matchesPrice(tour.price, selectedPrice) && matchesDuration(tour.duration, selectedDuration);
+    }),
+    selectedSort
+  );
 
-  const totalPages = apiTours?.totalPages || Math.ceil(filteredTours.length / itemsPerPage);
+  const totalPages = apiTours?.meta?.totalPages || Math.ceil(filteredTours.length / itemsPerPage);
   const displayedTours = apiTours?.data
     ? filteredTours
     : filteredTours.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategory, selectedPrice, selectedDuration, searchQuery]);
+  }, [selectedCategory, selectedPrice, selectedDuration, selectedSort, searchQuery]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -285,6 +337,7 @@ export default function ToursPage() {
                     setSelectedCategory("All");
                     setSelectedPrice("");
                     setSelectedDuration("");
+                    setSelectedSort("");
                   }}
                   className="text-xs text-sky hover:underline"
                 >
@@ -380,12 +433,14 @@ export default function ToursPage() {
                 </span>{" "}
                 tours
               </p>
-              <select className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-sky focus:outline-none">
-                <option>Sort: Recommended</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-                <option>Rating: High to Low</option>
-                <option>Duration: Short to Long</option>
+              <select
+                value={selectedSort}
+                onChange={(e) => setSelectedSort(e.target.value)}
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-sky focus:outline-none"
+              >
+                {SORT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
               </select>
             </div>
 
@@ -403,6 +458,7 @@ export default function ToursPage() {
                     setSelectedCategory("All");
                     setSelectedPrice("");
                     setSelectedDuration("");
+                    setSelectedSort("");
                     setSearchQuery("");
                   }}
                   className="btn-outline mt-6"
@@ -420,8 +476,8 @@ export default function ToursPage() {
                   >
                     <div className="relative h-48 overflow-hidden">
                       <img
-                        src={tour.image}
-                        alt={tour.title}
+                        src={tour.coverImage || tour.images?.[0] || ""}
+                        alt={tour.name}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
@@ -430,7 +486,7 @@ export default function ToursPage() {
                       </span>
                       <div className="absolute bottom-3 left-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-navy">
                         <Clock className="h-3.5 w-3.5" />
-                        {tour.duration}
+                        {tour.duration} Days{tour.nights != null ? ` / ${tour.nights} Nights` : ""}
                       </div>
                     </div>
                     <div className="p-4">
@@ -439,10 +495,10 @@ export default function ToursPage() {
                         {tour.destination}
                       </div>
                       <h3 className="mt-1.5 font-bold text-navy group-hover:text-sky transition-colors">
-                        {tour.title}
+                        {tour.name}
                       </h3>
                       <p className="mt-1 line-clamp-2 text-xs text-gray-500">
-                        {tour.description}
+                        {tour.shortDescription}
                       </p>
                       <div className="mt-3 flex items-center justify-between border-t pt-3">
                         <div>
@@ -454,15 +510,17 @@ export default function ToursPage() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <div className="flex items-center gap-1">
-                            <Star className="h-3.5 w-3.5 fill-gold text-gold" />
-                            <span className="text-sm font-semibold">
-                              {tour.rating}
-                            </span>
-                          </div>
+                          {tour.rating != null && (
+                            <div className="flex items-center gap-1">
+                              <Star className="h-3.5 w-3.5 fill-gold text-gold" />
+                              <span className="text-sm font-semibold">
+                                {tour.rating}
+                              </span>
+                            </div>
+                          )}
                           <div className="flex items-center gap-1 text-[10px] text-gray-400">
                             <Users className="h-3 w-3" />
-                            Max {tour.groupSize}
+                            Max {tour.maxGroupSize}
                           </div>
                         </div>
                       </div>

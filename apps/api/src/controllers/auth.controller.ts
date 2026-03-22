@@ -63,7 +63,8 @@ export async function socialLogin(req: Request, res: Response, next: NextFunctio
       },
       select: { id: true, email: true, name: true, image: true, role: true },
     });
-    sendSuccess(res, user, "User synced");
+    const token = authService.generateToken(user.id, user.email, user.role);
+    sendSuccess(res, { user, token }, "User synced");
   } catch (error) {
     next(error);
   }
